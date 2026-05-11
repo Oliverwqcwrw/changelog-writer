@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Changelog Writer — Turn Commits Into Beautiful Release Notes</title>
+  <meta name="description" content="Free AI-powered changelog writer. Paste your git commits or bullet points and instantly generate professional, user-friendly release notes. No signup required." />
+  <meta name="keywords" content="changelog writer, release notes generator, git changelog, AI changelog, changelog generator free" />
+  <link rel="canonical" href="https://oliverwqcwrw.github.io/changelog-writer/" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "AI Changelog Writer",
+    "description": "Turn git commits and bullet points into beautiful, user-friendly release notes and changelogs.",
+    "url": "https://oliverwqcwrw.github.io/changelog-writer/",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --accent2: #3fb950;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --danger: #f85149;
+    }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.2rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    header .logo { font-size: 1.5rem; }
+    header h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); }
+    header p { font-size: 0.85rem; color: var(--muted); }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
+    .badge { display: inline-block; background: #1f6feb33; color: var(--accent); border: 1px solid #1f6feb88; border-radius: 999px; font-size: 0.72rem; padding: 2px 10px; margin-bottom: 1.2rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media(max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    textarea, input, select { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 0.65rem 0.85rem; font-size: 0.9rem; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.2s; }
+    textarea:focus, input:focus, select:focus { border-color: var(--accent); }
+    textarea { min-height: 180px; }
+    .row { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .row > * { flex: 1; min-width: 140px; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.4rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: opacity 0.2s, transform 0.1s; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--accent); color: #0d1117; }
+    .btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .output-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.1rem; min-height: 220px; white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 0.88rem; line-height: 1.7; color: var(--text); }
+    .output-box.placeholder { color: var(--muted); font-style: italic; }
+    .provider-section { margin-bottom: 1.5rem; }
+    .provider-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .tab { padding: 0.4rem 0.9rem; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+    .tab.active { background: var(--accent); color: #0d1117; border-color: var(--accent); font-weight: 700; }
+    .key-row { display: flex; gap: 0.5rem; }
+    .key-row input { flex: 1; font-family: monospace; }
+    .saved-badge { color: var(--accent2); font-size: 0.78rem; align-self: center; white-space: nowrap; }
+    .copy-btn { padding: 0.4rem 0.9rem; font-size: 0.82rem; }
+    .action-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem; }
+    .spinner { display: none; width: 18px; height: 18px; border: 2px solid transparent; border-top-color: #0d1117; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading .spinner { display: inline-block; }
+    .status { font-size: 0.82rem; color: var(--muted); }
+    .status.error { color: var(--danger); }
+    .format-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .pill { padding: 0.3rem 0.75rem; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: 0.78rem; transition: all 0.15s; }
+    .pill.active { background: #3fb95033; color: var(--accent2); border-color: var(--accent2); }
+    /* Donation */
+    .donation { text-align: center; padding: 2.5rem 1rem; margin-top: 3rem; border-top: 1px solid var(--border); }
+    .donation h3 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+    .donation p { color: var(--muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .crypto-grid { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .crypto-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.2rem 1.5rem; text-align: center; max-width: 220px; }
+    .crypto-card .name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.6rem; }
+    .crypto-card img { border-radius: 6px; margin-bottom: 0.6rem; display: block; margin-left: auto; margin-right: auto; }
+    .crypto-card .addr { font-family: monospace; font-size: 0.65rem; color: var(--muted); word-break: break-all; }
+    footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📋</div>
+  <div>
+    <h1>AI Changelog Writer</h1>
+    <p>Turn commits &amp; bullet points into beautiful release notes — free, no signup</p>
+  </div>
+</header>
+
+<div class="container">
+  <span class="badge">✨ Free · No signup · Bring your own API key</span>
+
+  <!-- AI Provider -->
+  <div class="card provider-section">
+    <label>AI Provider</label>
+    <div class="provider-tabs">
+      <button class="tab active" onclick="selectProvider('groq')">Groq (Free)</button>
+      <button class="tab" onclick="selectProvider('openrouter')">OpenRouter (Free)</button>
+      <button class="tab" onclick="selectProvider('deepseek')">DeepSeek</button>
+      <button class="tab" onclick="selectProvider('openai')">OpenAI</button>
+    </div>
+    <div class="key-row">
+      <input type="password" id="apiKey" placeholder="Paste your API key here..." oninput="saveKey()" />
+      <span class="saved-badge" id="savedBadge" style="display:none">✓ Saved</span>
+    </div>
+    <div style="margin-top:0.5rem; font-size:0.78rem; color:var(--muted)">
+      Keys stored locally in your browser only. Get free keys: 
+      <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent)">Groq</a> · 
+      <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent)">OpenRouter</a> · 
+      <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color:var(--accent)">DeepSeek</a>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Input -->
+    <div class="card">
+      <label>Input — Git Commits or Bullet Points</label>
+      <div class="row" style="margin-bottom:0.75rem">
+        <div>
+          <label style="text-transform:none; letter-spacing:0; margin-bottom:0.3rem; color:var(--muted); font-size:0.8rem">Version / Tag</label>
+          <input type="text" id="version" placeholder="e.g. v2.3.0" />
+        </div>
+        <div>
+          <label style="text-transform:none; letter-spacing:0; margin-bottom:0.3rem; color:var(--muted); font-size:0.8rem">Project Name</label>
+          <input type="text" id="project" placeholder="e.g. MyApp" />
+        </div>
+      </div>
+      <label style="margin-bottom:0.4rem; font-size:0.8rem; color:var(--muted)">Tone</label>
+      <select id="tone" style="margin-bottom:0.75rem">
+        <option value="professional">Professional</option>
+        <option value="friendly">Friendly &amp; Casual</option>
+        <option value="technical">Technical</option>
+        <option value="marketing">Marketing / Exciting</option>
+      </select>
+      <label style="margin-bottom:0.4rem; font-size:0.8rem; color:var(--muted)">Format</label>
+      <div class="format-pills" id="formatPills">
+        <button class="pill active" onclick="selectFormat('markdown')">Markdown</button>
+        <button class="pill" onclick="selectFormat('keepachangelog')">Keep a Changelog</button>
+        <button class="pill" onclick="selectFormat('plain')">Plain Text</button>
+        <button class="pill" onclick="selectFormat('html')">HTML</button>
+      </div>
+      <label style="margin-bottom:0.4rem; font-size:0.8rem; color:var(--muted)">Commits / Changes</label>
+      <textarea id="commits" placeholder="Paste git log output or bullet points, e.g.:&#10;&#10;- feat: add dark mode support&#10;- fix: resolve crash on startup&#10;- chore: update dependencies&#10;- refactor: improve auth flow&#10;- docs: update README"></textarea>
+      <div class="action-row">
+        <button class="btn btn-primary" id="generateBtn" onclick="generate()">
+          <div class="spinner" id="spinner"></div>
+          Generate Changelog
+        </button>
+        <button class="btn btn-secondary" onclick="loadExample()">Load Example</button>
+        <span class="status" id="status"></span>
+      </div>
+    </div>
+
+    <!-- Output -->
+    <div class="card" style="display:flex; flex-direction:column; gap:0.75rem">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <label style="margin:0">Generated Changelog</label>
+        <button class="btn btn-secondary copy-btn" onclick="copyOutput()">📋 Copy</button>
+      </div>
+      <div class="output-box placeholder" id="output">Your changelog will appear here…</div>
+    </div>
+  </div>
+
+  <!-- Donation -->
+  <div class="donation">
+    <h3>☕ Support This Tool</h3>
+    <p>Built with ❤️ and kept free forever. If it saved you time, consider a small crypto tip!</p>
+    <div class="crypto-grid">
+      <div class="crypto-card">
+        <div class="name">USDT (TRC-20)</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=TSvC67jexputnNHayVR8fpScwFmwvZV8jp" width="110" height="110" alt="USDT QR" />
+        <div class="addr">TSvC67jexputnNHayVR8fpScwFmwvZV8jp</div>
+      </div>
+      <div class="crypto-card">
+        <div class="name">ETH (ERC-20)</div>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=0x11e764fac3fcd4be16da43a252a62b156e06a632" width="110" height="110" alt="ETH QR" />
+        <div class="addr">0x11e764fac3fcd4be16da43a252a62b156e06a632</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>AI Changelog Writer · Free · Open Source · No data stored · <a href="https://oliverwqcwrw.github.io/" style="color:var(--accent)">More AI Tools</a></footer>
+
+<script>
+  const PROVIDERS = {
+    groq:        { url: 'https://api.groq.com/openai/v1/chat/completions',                 model: 'llama-3.3-70b-versatile' },
+    openrouter:  { url: 'https://openrouter.ai/api/v1/chat/completions',                   model: 'meta-llama/llama-3.3-70b-instruct:free' },
+    deepseek:    { url: 'https://api.deepseek.com/v1/chat/completions',                    model: 'deepseek-chat' },
+    openai:      { url: 'https://api.openai.com/v1/chat/completions',                      model: 'gpt-4o-mini' },
+  };
+
+  let currentProvider = 'groq';
+  let currentFormat = 'markdown';
+
+  function selectProvider(p) {
+    currentProvider = p;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    const saved = localStorage.getItem('clw_key_' + p) || '';
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('savedBadge').style.display = saved ? 'inline' : 'none';
+  }
+
+  function saveKey() {
+    const val = document.getElementById('apiKey').value.trim();
+    if (val) { localStorage.setItem('clw_key_' + currentProvider, val); document.getElementById('savedBadge').style.display = 'inline'; }
+    else { localStorage.removeItem('clw_key_' + currentProvider); document.getElementById('savedBadge').style.display = 'none'; }
+  }
+
+  function selectFormat(f) {
+    currentFormat = f;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+
+  function loadExample() {
+    document.getElementById('version').value = 'v2.1.0';
+    document.getElementById('project').value = 'AwesomeApp';
+    document.getElementById('commits').value = `feat: add dark mode support with system preference detection
+fix: resolve crash when uploading files larger than 50MB
+feat: new onboarding flow with interactive tutorial
+fix: incorrect date formatting in US locale
+perf: lazy-load dashboard charts, reducing initial load by 40%
+chore: upgrade React to 18.3.1
+fix: password reset email not sent for uppercase emails
+feat: export reports as PDF or CSV
+refactor: split auth module into smaller composables
+docs: update API reference with new endpoints`;
+  }
+
+  async function generate() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const commits = document.getElementById('commits').value.trim();
+    if (!apiKey) { setStatus('⚠️ Please enter your API key', true); return; }
+    if (!commits) { setStatus('⚠️ Please paste your commits or changes', true); return; }
+
+    const version = document.getElementById('version').value.trim() || 'vX.X.X';
+    const project = document.getElementById('project').value.trim() || 'Project';
+    const tone    = document.getElementById('tone').value;
+
+    const formatInstructions = {
+      markdown: 'Use Markdown with ## headers for sections (Added, Fixed, Changed, Removed, Performance), bold for key terms, and bullet points.',
+      keepachangelog: 'Follow the keepachangelog.com format strictly: ## [VERSION] - YYYY-MM-DD header, then ### Added / ### Changed / ### Fixed / ### Removed sections with bullet points.',
+      plain: 'Use plain text with clear section headers in ALL CAPS (ADDED, FIXED, CHANGED) and simple bullet points using dashes.',
+      html: 'Output clean HTML using <h2> for version header, <h3> for section names, and <ul><li> for each item. No CSS inline styles.',
+    };
+
+    const systemPrompt = `You are an expert technical writer specializing in software changelogs and release notes. 
+Your goal is to transform raw git commits or bullet points into clear, user-friendly changelog entries.
+Group changes into categories: Added, Fixed, Changed, Removed, Performance, Security.
+Write each entry from the user's perspective, not the developer's. Avoid jargon where possible.
+Tone: ${tone}.
+Format: ${formatInstructions[currentFormat]}`;
+
+    const userPrompt = `Generate a changelog for ${project} ${version} from the following commits/changes:
+
+${commits}
+
+Today's date: ${new Date().toISOString().split('T')[0]}`;
+
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = true; btn.classList.add('loading');
+    setStatus('Generating…');
+    const out = document.getElementById('output');
+    out.textContent = ''; out.classList.remove('placeholder');
+
+    try {
+      const prov = PROVIDERS[currentProvider];
+      const res = await fetch(prov.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: prov.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }], temperature: 0.4, stream: true }),
+      });
+      if (!res.ok) { const err = await res.text(); throw new Error(`API error ${res.status}: ${err.slice(0,200)}`); }
+      const reader = res.body.getReader(); const decoder = new TextDecoder();
+      let buf = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') continue;
+          try { const j = JSON.parse(data); const d = j.choices?.[0]?.delta?.content; if (d) { out.textContent += d; } } catch {}
+        }
+      }
+      setStatus('✓ Done');
+    } catch(e) {
+      setStatus('Error: ' + e.message, true);
+      if (!out.textContent) { out.textContent = ''; out.classList.add('placeholder'); }
+    } finally {
+      btn.disabled = false; btn.classList.remove('loading');
+    }
+  }
+
+  function copyOutput() {
+    const text = document.getElementById('output').textContent;
+    if (!text || text === 'Your changelog will appear here…') return;
+    navigator.clipboard.writeText(text).then(() => { setStatus('✓ Copied!'); setTimeout(() => setStatus(''), 2000); });
+  }
+
+  function setStatus(msg, isError=false) {
+    const el = document.getElementById('status');
+    el.textContent = msg; el.className = 'status' + (isError ? ' error' : '');
+  }
+
+  // Load saved key on init
+  (function init() {
+    const saved = localStorage.getItem('clw_key_groq') || '';
+    document.getElementById('apiKey').value = saved;
+    if (saved) document.getElementById('savedBadge').style.display = 'inline';
+  })();
+</script>
+
+</body>
+</html>
